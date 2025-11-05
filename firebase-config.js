@@ -2,6 +2,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyDmMKjRwOagaEdWElMy98r8shtibk9LXNM",
   authDomain: "birthdays-reminder-4a1c1.firebaseapp.com",
+  databaseURL: "https://birthdays-reminder-4a1c1-default-rtdb.firebaseio.com",
   projectId: "birthdays-reminder-4a1c1",
   storageBucket: "birthdays-reminder-4a1c1.firebasestorage.app",
   messagingSenderId: "23543078001",
