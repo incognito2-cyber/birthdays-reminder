@@ -1,53 +1,68 @@
 const db = firebase.database();
-const list = document.getElementById("birthday-list");
-const form = document.getElementById("birthday-form");
+const messaging = firebase.messaging();
+messaging.usePublicVapidKey("BMhjknZIvmmVFZf3tBlCuLf5VPxxdvrTLnUfFuCt9PPFlk-zy70xVEKIp8_E2zvrUemrH_l5BIU0Hd1I4JsU-HI");
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const name = document.getElementById("name").value.trim();
-  const date = document.getElementById("date").value;
+const nameInput = document.getElementById("nameInput");
+const dateInput = document.getElementById("dateInput");
+const addBtn = document.getElementById("addBtn");
+const list = document.getElementById("birthdaysList");
 
-  if (name && date) {
-    db.ref("birthdays").push({ name, date });
-    form.reset();
-  }
+// Добавление дня рождения
+function addBirthday() {
+  const name = nameInput.value.trim();
+  const date = dateInput.value;
+  if (!name || !date) return;
+
+  db.ref("birthdays").push({ name, date });
+  nameInput.value = "";
+  dateInput.value = "";
+}
+
+// Добавление по клику +
+addBtn.addEventListener("click", addBirthday);
+
+// Добавление по Enter
+[nameInput, dateInput].forEach(input => {
+  input.addEventListener("keypress", e => {
+    if (e.key === "Enter") addBirthday();
+  });
 });
 
-db.ref("birthdays").on("value", (snapshot) => {
+// Отображение списка
+db.ref("birthdays").on("value", snapshot => {
   list.innerHTML = "";
-  snapshot.forEach((child) => {
-    const data = child.val();
+  snapshot.forEach(child => {
+    const { name, date } = child.val();
     const li = document.createElement("li");
-    li.textContent = `${data.name} — ${data.date}`;
+    const text = document.createElement("span");
+    text.textContent = `${name} — ${date}`;
+
+    const del = document.createElement("button");
+    del.textContent = "✕";
+    del.onclick = () => {
+      if (confirm(`Удалить ${name}?`)) db.ref("birthdays").child(child.key).remove();
+    };
+
+    li.appendChild(text);
+    li.appendChild(del);
     list.appendChild(li);
   });
 });
 
-// Разрешение на уведомления
-Notification.requestPermission().then((permission) => {
+// 🔔 Push-уведомления
+Notification.requestPermission().then(permission => {
   if (permission === "granted") {
-    console.log("Уведомления разрешены");
+    messaging.getToken().then(token => {
+      console.log("FCM Token:", token);
+    });
   }
 });
 
-// Проверка дней рождений раз в день
-setInterval(() => {
-  const today = new Date().toISOString().slice(5, 10);
-  db.ref("birthdays").once("value").then((snapshot) => {
-    snapshot.forEach((child) => {
-      const data = child.val();
-      if (data.date.slice(5, 10) === today) {
-        showBirthdayNotification(data.name);
-      }
-    });
+// 🔥 Получение уведомлений
+messaging.onMessage(payload => {
+  console.log("Получено уведомление:", payload);
+  new Notification(payload.notification.title, {
+    body: payload.notification.body,
+    icon: payload.notification.icon
   });
-}, 60 * 60 * 1000); // проверка каждый час
-
-function showBirthdayNotification(name) {
-  if (Notification.permission === "granted") {
-    new Notification("🎂 Сегодня день рождения!", {
-      body: `${name} празднует сегодня 🎉`,
-      icon: "https://cdn-icons-png.flaticon.com/512/3448/3448599.png"
-    });
-  }
-}
+});
