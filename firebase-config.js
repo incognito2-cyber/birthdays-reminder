@@ -1,4 +1,3 @@
-// Твой Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDmMKjRwOagaEdWElMy98r8shtibk9LXNM",
   authDomain: "birthdays-reminder-4a1c1.firebaseapp.com",
@@ -10,5 +9,4 @@ const firebaseConfig = {
   measurementId: "G-B9GC38FX9P"
 };
 
-// Инициализация Firebase
 firebase.initializeApp(firebaseConfig);
