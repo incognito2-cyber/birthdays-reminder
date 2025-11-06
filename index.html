@@ -1,68 +1,88 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Birthdays Reminder</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎂 Напоминания о днях рождениях</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 400px;
+    }
+    li {
+      background: white;
+      margin: 6px 0;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    li span {
+      flex: 1;
+    }
+    li button {
+      background: crimson;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    li button:hover {
+      background: darkred;
+    }
+  </style>
 </head>
 <body>
-  <h1>🎂 Список дней рождений</h1>
+  <h1>🎂 Мои дни рождения</h1>
 
-  <div id="list"></div>
+  <div>
+    <input id="nameInput" placeholder="Имя" />
+    <input id="dateInput" type="date" />
+    <button id="addBtn">+</button>
+  </div>
 
-  <hr>
+  <ul id="birthdaysList"></ul>
 
-  <h3>Добавить день рождения</h3>
-  <input id="name" placeholder="Имя">
-  <input id="date" type="date">
-  <button id="addBtn">Добавить</button>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
-  <script>
-    // 🔥 Твой Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDmMKjRwOagaEdWElMy98r8shtibk9LXNM",
-      authDomain: "birthdays-reminder-4a1c1.firebaseapp.com",
-      projectId: "birthdays-reminder-4a1c1",
-      storageBucket: "birthdays-reminder-4a1c1.firebasestorage.app",
-      messagingSenderId: "23543078001",
-      appId: "1:23543078001:web:32ffb8edaa9b729a864fd0",
-      measurementId: "G-B9GC38FX9P",
-      databaseURL: "https://birthdays-reminder-4a1c1-default-rtdb.firebaseio.com/"
-    };
-
-    // Инициализация
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // Добавление дня рождения
-    document.getElementById("addBtn").addEventListener("click", () => {
-      const name = document.getElementById("name").value;
-      const date = document.getElementById("date").value;
-      if (!name || !date) return alert("Введите имя и дату!");
-      db.ref("birthdays").push({ name, date });
-      document.getElementById("name").value = "";
-      document.getElementById("date").value = "";
-    });
-
-    // Отображение списка
-    const listDiv = document.getElementById("list");
-    db.ref("birthdays").on("value", (snapshot) => {
-      const data = snapshot.val();
-      listDiv.innerHTML = "";
-      if (data) {
-        Object.entries(data).forEach(([id, item]) => {
-          const div = document.createElement("div");
-          div.textContent = `${item.name} — ${item.date}`;
-          listDiv.appendChild(div);
-        });
-      } else {
-        listDiv.textContent = "Пока нет записей.";
-      }
-    });
-  </script>
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
