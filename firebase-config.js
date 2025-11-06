@@ -8,17 +8,4 @@ const firebaseConfig = {
   appId: "1:23543078001:web:32ffb8edaa9b729a864fd0",
   measurementId: "G-B9GC38FX9P"
 };
-
-// Инициализация
 firebase.initializeApp(firebaseConfig);
-
-// Проверим, подключен ли Realtime Database
-const db = firebase.database();
-
-// Попробуем безопасно подключить Messaging (если SDK поддерживает)
-let messaging = null;
-try {
-  messaging = firebase.messaging();
-} catch (e) {
-  console.warn("Firebase Messaging недоступен:", e.message);
-}
