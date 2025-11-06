@@ -2,7 +2,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyDmMKjRwOagaEdWElMy98r8shtibk9LXNM",
   authDomain: "birthdays-reminder-4a1c1.firebaseapp.com",
-  databaseURL: "https://birthdays-reminder-4a1c1-default-rtdb.firebaseio.com",
+  databaseURL: "https://birthdays-reminder-4a1c1-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "birthdays-reminder-4a1c1",
   storageBucket: "birthdays-reminder-4a1c1.firebasestorage.app",
   messagingSenderId: "23543078001",
@@ -10,8 +10,5 @@ const firebaseConfig = {
   measurementId: "G-B9GC38FX9P"
 };
 
+// Инициализация Firebase
 firebase.initializeApp(firebaseConfig);
-
-// Messaging
-const messaging = firebase.messaging();
-messaging.usePublicVapidKey("BMhjknZIvmmVFZf3tBlCuLf5VPxxdvrTLnUfFuCt9PPFlk-zy70xVEKIp8_E2zvrUemrH_l5BIU0Hd1I4JsU-HI");
