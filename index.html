@@ -2,38 +2,66 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>🎂 Напоминания о днях рождениях</title>
   <link rel="manifest" href="manifest.json" />
+
   <style>
+    /* Базовые настройки */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: system-ui, sans-serif;
       background: #f0f2f5;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px;
+      padding: 20px;
+      margin: 0;
     }
+
     h1 {
       color: #333;
       margin-bottom: 20px;
+      text-align: center;
     }
+
+    /* Контейнер ввода */
+    div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      width: 100%;
+      max-width: 400px;
+    }
+
     input, button {
       padding: 10px;
       font-size: 16px;
-      margin: 5px;
       border-radius: 8px;
       border: 1px solid #ccc;
     }
+
+    input {
+      flex: 1 1 120px; /* адаптивная ширина */
+    }
+
     button {
       background: #007bff;
       color: white;
       cursor: pointer;
       transition: 0.3s;
+      flex: 0 0 auto;
     }
+
     button:hover {
       background: #0056b3;
     }
+
+    /* Список */
     ul {
       list-style: none;
       padding: 0;
@@ -41,19 +69,27 @@
       width: 100%;
       max-width: 400px;
     }
+
     li {
       background: white;
       margin: 6px 0;
       padding: 10px;
       border-radius: 8px;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 5px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
+
     li span {
-      flex: 1;
+      flex: 1 1 auto;
+      min-width: 50px;
+      cursor: pointer;
+      word-break: break-word;
     }
+
     li button {
       background: crimson;
       border: none;
@@ -61,17 +97,38 @@
       padding: 6px 10px;
       border-radius: 6px;
       cursor: pointer;
-      margin-left: 5px;
+      flex: 0 0 auto;
     }
+
     li button:hover {
       background: darkred;
     }
+
     #clearAll {
       margin-top: 15px;
       background: darkorange;
+      width: 100%;
+      max-width: 400px;
     }
+
     #clearAll:hover {
       background: orangered;
+    }
+
+    /* Адаптив для мобильных */
+    @media (max-width: 480px) {
+      input, button {
+        font-size: 14px;
+        padding: 8px;
+      }
+
+      li {
+        font-size: 14px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
     }
   </style>
 </head>
@@ -92,7 +149,10 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
 
+  <!-- Конфиг Firebase -->
   <script src="firebase-config.js"></script>
+
+  <!-- Скрипт сайта -->
   <script src="script.js"></script>
 </body>
 </html>
