@@ -29,14 +29,11 @@ addBtn.addEventListener("click", addBirthday);
   });
 });
 
-// Проверка, совпадает ли дата с сегодняшней
+// Проверка, совпадает ли дата с сегодняшней (исправлено)
 function isToday(dateStr) {
   const today = new Date();
-  const date = new Date(dateStr);
-  return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth()
-  );
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return today.getDate() === day && (today.getMonth() + 1) === month;
 }
 
 // Отображение списка
@@ -47,13 +44,15 @@ db.ref("birthdays").on("value", snapshot => {
     const li = document.createElement("li");
     const text = document.createElement("span");
 
-    // Если сегодня день рождения — добавляем 🎉 или ✅
+    // 🎉 Если сегодня день рождения
     if (isToday(date)) {
       text.textContent = `${name} — ${date} 🎉`;
       li.style.border = "2px solid #28a745"; // зелёная рамка
-      li.style.background = "#eaffea"; // мягкий зелёный фон
+      li.style.background = "#eaffea";       // мягкий зелёный фон
     } else {
       text.textContent = `${name} — ${date}`;
+      li.style.border = "";
+      li.style.background = "white";
     }
 
     const del = document.createElement("button");
@@ -75,7 +74,7 @@ clearAllBtn.addEventListener("click", () => {
   }
 });
 
-// Уведомления
+// Уведомления (FCM)
 Notification.requestPermission().then(permission => {
   if (permission === "granted") {
     messaging.getToken().then(token => {
