@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>🎂 Напоминания о днях рождениях</title>
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="manifest.json">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -95,8 +95,8 @@
   <h1>🎂 Мои дни рождения</h1>
 
   <div>
-    <input id="nameInput" placeholder="Имя" />
-    <input id="dateInput" type="date" />
+    <input id="nameInput" placeholder="Имя">
+    <input id="dateInput" type="text" placeholder="yyyy-mm-dd">
     <button id="addBtn">+</button>
   </div>
 
@@ -108,7 +108,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
 
-  <!-- Конфиг Firebase -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDmMKjRwOagaEdWElMy98r8shtibk9LXNM",
@@ -121,12 +120,10 @@
       measurementId: "G-B9GC38FX9P"
     };
     firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
   </script>
 
-  <!-- Скрипт сайта -->
   <script>
-    const db = firebase.database();
-
     const nameInput = document.getElementById("nameInput");
     const dateInput = document.getElementById("dateInput");
     const addBtn = document.getElementById("addBtn");
@@ -135,8 +132,10 @@
 
     function addBirthday() {
       const name = nameInput.value.trim();
-      const date = dateInput.value;
-      if (!name || !date) return;
+      let date = dateInput.value.trim();
+      if (!name) return;
+      // fallback для пустой даты
+      if (!date) date = new Date().toISOString().slice(0,10);
       db.ref("birthdays").push({ name, date });
       nameInput.value = "";
       dateInput.value = "";
@@ -144,9 +143,7 @@
 
     addBtn.addEventListener("click", addBirthday);
     [nameInput, dateInput].forEach(input => {
-      input.addEventListener("keypress", e => {
-        if (e.key === "Enter") addBirthday();
-      });
+      input.addEventListener("keypress", e => { if (e.key === "Enter") addBirthday(); });
     });
 
     function isToday(dateStr) {
@@ -155,20 +152,7 @@
       return d.getDate() === today.getDate() && d.getMonth() === today.getMonth();
     }
 
-    function sendBirthdayNotification(name) {
-      if (Notification.permission === "granted" && "serviceWorker" in navigator) {
-        navigator.serviceWorker.ready.then(registration => {
-          registration.active.postMessage({
-            type: "BIRTHDAY_NOTIFICATION",
-            title: "Сегодня день рождения!",
-            body: `${name} празднует день рождения 🎉`,
-            icon: "/icon.png"
-          });
-        });
-      }
-    }
-
-    db.ref("birthdays").on("value", snapshot => {
+    function renderList(snapshot) {
       list.innerHTML = "";
       snapshot.forEach(child => {
         const key = child.key;
@@ -192,7 +176,7 @@
               nameSpan.textContent = newName;
             } else input.replaceWith(nameSpan);
           });
-          input.addEventListener("keypress", e => { if (e.key === "Enter") input.blur(); });
+          input.addEventListener("keypress", e => { if (e.key==="Enter") input.blur(); });
         };
 
         const dateSpan = document.createElement("span");
@@ -200,31 +184,28 @@
         dateSpan.style.marginLeft = "10px";
         dateSpan.onclick = () => {
           const input = document.createElement("input");
-          input.type = "date";
+          input.type = "text";
           input.value = dateSpan.textContent;
           dateSpan.replaceWith(input);
           input.focus();
           input.addEventListener("blur", () => {
-            const newDate = input.value;
+            const newDate = input.value.trim();
             if (newDate) {
               db.ref("birthdays").child(key).update({ date: newDate });
               input.replaceWith(dateSpan);
               dateSpan.textContent = newDate;
             } else input.replaceWith(dateSpan);
           });
-          input.addEventListener("keypress", e => { if (e.key === "Enter") input.blur(); });
+          input.addEventListener("keypress", e => { if (e.key==="Enter") input.blur(); });
         };
 
         const checkSpan = document.createElement("span");
         checkSpan.style.marginLeft = "10px";
         checkSpan.textContent = isToday(date) ? "🎉" : "";
-        if (isToday(date)) sendBirthdayNotification(name);
 
         const delBtn = document.createElement("button");
         delBtn.textContent = "✕";
-        delBtn.onclick = () => {
-          if (confirm(`Удалить ${name}?`)) db.ref("birthdays").child(key).remove();
-        };
+        delBtn.onclick = () => { if(confirm(`Удалить ${name}?`)) db.ref("birthdays").child(key).remove(); };
 
         li.appendChild(nameSpan);
         li.appendChild(dateSpan);
@@ -232,17 +213,11 @@
         li.appendChild(delBtn);
         list.appendChild(li);
       });
-    });
+    }
 
-    clearAllBtn.addEventListener("click", () => {
-      if (confirm("Удалить весь список?")) db.ref("birthdays").remove();
-    });
+    db.ref("birthdays").on("value", renderList);
 
-    Notification.requestPermission().then(permission => {
-      if (permission === "granted" && "serviceWorker" in navigator) {
-        navigator.serviceWorker.register("firebase-messaging-sw.js");
-      }
-    });
+    clearAllBtn.addEventListener("click", () => { if(confirm("Удалить весь список?")) db.ref("birthdays").remove(); });
   </script>
 </body>
 </html>
