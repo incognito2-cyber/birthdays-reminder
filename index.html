@@ -2,106 +2,37 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎂 Напоминания о днях рождениях</title>
   <link rel="manifest" href="manifest.json">
-
   <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f0f2f5;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      margin: 0;
-    }
-    h1 { color: #333; margin-bottom: 20px; text-align: center; }
-    div {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      width: 100%;
-      max-width: 400px;
-    }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
+    body { font-family: system-ui, sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    h1 { text-align: center; color: #333; margin-bottom: 20px; }
+    div { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 400px; }
+    input, button { padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; }
     input { flex: 1 1 120px; }
-    button {
-      background: #007bff;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-      flex: 0 0 auto;
-    }
+    button { background: #007bff; color: white; cursor: pointer; transition: 0.3s; }
     button:hover { background: #0056b3; }
-    ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 20px;
-      width: 100%;
-      max-width: 400px;
-      min-height: 50px;
-    }
-    li {
-      background: white;
-      margin: 6px 0;
-      padding: 10px;
-      border-radius: 8px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    li span {
-      flex: 1 1 auto;
-      min-width: 50px;
-      cursor: pointer;
-      word-break: break-word;
-    }
-    li button {
-      background: crimson;
-      border: none;
-      color: white;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      flex: 0 0 auto;
-    }
+    ul { list-style: none; padding: 0; margin-top: 20px; width: 100%; max-width: 400px; min-height: 50px; }
+    li { background: white; margin: 6px 0; padding: 10px; border-radius: 8px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    li span { flex: 1 1 auto; min-width: 50px; cursor: pointer; word-break: break-word; }
+    li button { background: crimson; border: none; color: white; padding: 6px 10px; border-radius: 6px; cursor: pointer; flex: 0 0 auto; }
     li button:hover { background: darkred; }
-    #clearAll {
-      margin-top: 15px;
-      background: darkorange;
-      width: 100%;
-      max-width: 400px;
-    }
+    #clearAll { margin-top: 15px; background: darkorange; width: 100%; max-width: 400px; }
     #clearAll:hover { background: orangered; }
-    @media (max-width: 480px) {
-      input, button { font-size: 14px; padding: 8px; }
-      li { font-size: 14px; }
-      h1 { font-size: 20px; }
-    }
+    #toastContainer { position: fixed; top: 20px; right: 20px; z-index: 9999; }
   </style>
 </head>
 <body>
   <h1>🎂 Мои дни рождения</h1>
-
   <div>
     <input id="nameInput" placeholder="Имя">
     <input id="dateInput" type="text" placeholder="yyyy-mm-dd">
     <button id="addBtn">+</button>
   </div>
-
   <ul id="birthdaysList"></ul>
   <button id="clearAll">🗑 Удалить всё</button>
+  <div id="toastContainer"></div>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -116,25 +47,43 @@
       projectId: "birthdays-reminder-4a1c1",
       storageBucket: "birthdays-reminder-4a1c1.appspot.com",
       messagingSenderId: "23543078001",
-      appId: "1:23543078001:web:32ffb8edaa9b729a864fd0",
-      measurementId: "G-B9GC38FX9P"
+      appId: "1:23543078001:web:32ffb8edaa9b729a864fd0"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-  </script>
+    const messaging = firebase.messaging();
 
-  <script>
     const nameInput = document.getElementById("nameInput");
     const dateInput = document.getElementById("dateInput");
     const addBtn = document.getElementById("addBtn");
     const list = document.getElementById("birthdaysList");
     const clearAllBtn = document.getElementById("clearAll");
+    const toastContainer = document.getElementById("toastContainer");
+
+    // Toast уведомление
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.textContent = message;
+      toast.style.background = "#007bff";
+      toast.style.color = "white";
+      toast.style.padding = "10px 15px";
+      toast.style.marginTop = "10px";
+      toast.style.borderRadius = "8px";
+      toast.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
+      toast.style.opacity = "0";
+      toast.style.transition = "opacity 0.5s";
+      toastContainer.appendChild(toast);
+      requestAnimationFrame(() => toast.style.opacity = "1");
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.addEventListener("transitionend", () => toast.remove());
+      }, 4000);
+    }
 
     function addBirthday() {
       const name = nameInput.value.trim();
       let date = dateInput.value.trim();
       if (!name) return;
-      // fallback для пустой даты
       if (!date) date = new Date().toISOString().slice(0,10);
       db.ref("birthdays").push({ name, date });
       nameInput.value = "";
@@ -142,14 +91,12 @@
     }
 
     addBtn.addEventListener("click", addBirthday);
-    [nameInput, dateInput].forEach(input => {
-      input.addEventListener("keypress", e => { if (e.key === "Enter") addBirthday(); });
-    });
+    [nameInput, dateInput].forEach(input => input.addEventListener("keypress", e => { if(e.key==="Enter") addBirthday(); }));
 
     function isToday(dateStr) {
       const today = new Date();
       const d = new Date(dateStr);
-      return d.getDate() === today.getDate() && d.getMonth() === today.getMonth();
+      return d.getDate()===today.getDate() && d.getMonth()===today.getMonth();
     }
 
     function renderList(snapshot) {
@@ -164,19 +111,15 @@
         nameSpan.textContent = name;
         nameSpan.onclick = () => {
           const input = document.createElement("input");
-          input.type = "text";
-          input.value = nameSpan.textContent;
+          input.type = "text"; input.value = nameSpan.textContent;
           nameSpan.replaceWith(input);
           input.focus();
           input.addEventListener("blur", () => {
             const newName = input.value.trim();
-            if (newName) {
-              db.ref("birthdays").child(key).update({ name: newName });
-              input.replaceWith(nameSpan);
-              nameSpan.textContent = newName;
-            } else input.replaceWith(nameSpan);
+            if (newName) { db.ref("birthdays").child(key).update({ name: newName }); nameSpan.textContent = newName; }
+            input.replaceWith(nameSpan);
           });
-          input.addEventListener("keypress", e => { if (e.key==="Enter") input.blur(); });
+          input.addEventListener("keypress", e => { if(e.key==="Enter") input.blur(); });
         };
 
         const dateSpan = document.createElement("span");
@@ -184,40 +127,49 @@
         dateSpan.style.marginLeft = "10px";
         dateSpan.onclick = () => {
           const input = document.createElement("input");
-          input.type = "text";
-          input.value = dateSpan.textContent;
+          input.type = "text"; input.value = dateSpan.textContent;
           dateSpan.replaceWith(input);
           input.focus();
           input.addEventListener("blur", () => {
             const newDate = input.value.trim();
-            if (newDate) {
-              db.ref("birthdays").child(key).update({ date: newDate });
-              input.replaceWith(dateSpan);
-              dateSpan.textContent = newDate;
-            } else input.replaceWith(dateSpan);
+            if (newDate) { db.ref("birthdays").child(key).update({ date: newDate }); dateSpan.textContent = newDate; }
+            input.replaceWith(dateSpan);
           });
-          input.addEventListener("keypress", e => { if (e.key==="Enter") input.blur(); });
+          input.addEventListener("keypress", e => { if(e.key==="Enter") input.blur(); });
         };
 
         const checkSpan = document.createElement("span");
         checkSpan.style.marginLeft = "10px";
-        checkSpan.textContent = isToday(date) ? "🎉" : "";
+        if(isToday(date)) { checkSpan.textContent = "🎉"; showToast(`🎉 Сегодня день рождения у ${name}!`); }
 
         const delBtn = document.createElement("button");
         delBtn.textContent = "✕";
         delBtn.onclick = () => { if(confirm(`Удалить ${name}?`)) db.ref("birthdays").child(key).remove(); };
 
-        li.appendChild(nameSpan);
-        li.appendChild(dateSpan);
-        li.appendChild(checkSpan);
-        li.appendChild(delBtn);
+        li.appendChild(nameSpan); li.appendChild(dateSpan); li.appendChild(checkSpan); li.appendChild(delBtn);
         list.appendChild(li);
       });
     }
 
     db.ref("birthdays").on("value", renderList);
-
     clearAllBtn.addEventListener("click", () => { if(confirm("Удалить весь список?")) db.ref("birthdays").remove(); });
+
+    // FCM token сохранение
+    if("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("firebase-messaging-sw.js")
+        .then(() => console.log("SW зарегистрирован"))
+        .catch(err => console.error("Ошибка SW:", err));
+    }
+
+    Notification.requestPermission().then(permission => {
+      if(permission==="granted") {
+        messaging.usePublicVapidKey("BMhjknZIvmmVFZf3tBlCuLf5VPxxdvrTLnUfFuCt9PPFlk-zy70xVEKIp8_E2zvrUemrH_l5BIU0Hd1I4JsU-HI");
+        messaging.getToken().then(token => {
+          console.log("FCM Token:", token);
+          firebase.database().ref("tokens").child(token).set(true);
+        });
+      }
+    });
   </script>
 </body>
 </html>
