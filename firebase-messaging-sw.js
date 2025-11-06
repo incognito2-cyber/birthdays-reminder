@@ -1,7 +1,6 @@
 importScripts("https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js");
 importScripts("https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js");
 
-// Инициализация Firebase
 firebase.initializeApp({
   apiKey: "AIzaSyDmMKjRwOagaEdWElMy98r8shtibk9LXNM",
   authDomain: "birthdays-reminder-4a1c1.firebaseapp.com",
@@ -11,8 +10,6 @@ firebase.initializeApp({
 });
 
 const messaging = firebase.messaging();
-
-// Обработка фоновых сообщений
 messaging.onBackgroundMessage(payload => {
   const { title, body, icon } = payload.notification;
   self.registration.showNotification(title, { body, icon });
