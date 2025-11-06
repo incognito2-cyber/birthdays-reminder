@@ -6,6 +6,7 @@ const nameInput = document.getElementById("nameInput");
 const dateInput = document.getElementById("dateInput");
 const addBtn = document.getElementById("addBtn");
 const list = document.getElementById("birthdaysList");
+const clearAllBtn = document.getElementById("clearAll");
 
 // Добавление дня рождения
 function addBirthday() {
@@ -18,7 +19,7 @@ function addBirthday() {
   dateInput.value = "";
 }
 
-// Добавление по клику +
+// Добавление по кнопке +
 addBtn.addEventListener("click", addBirthday);
 
 // Добавление по Enter
@@ -49,7 +50,14 @@ db.ref("birthdays").on("value", snapshot => {
   });
 });
 
-// 🔔 Push-уведомления
+// Удалить всё
+clearAllBtn.addEventListener("click", () => {
+  if (confirm("Удалить весь список дней рождений?")) {
+    db.ref("birthdays").remove();
+  }
+});
+
+// Уведомления
 Notification.requestPermission().then(permission => {
   if (permission === "granted") {
     messaging.getToken().then(token => {
@@ -58,7 +66,6 @@ Notification.requestPermission().then(permission => {
   }
 });
 
-// 🔥 Получение уведомлений
 messaging.onMessage(payload => {
   console.log("Получено уведомление:", payload);
   new Notification(payload.notification.title, {
