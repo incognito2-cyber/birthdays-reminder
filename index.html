@@ -6,21 +6,90 @@
   <title>🎂 Напоминания о днях рождениях</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    body { font-family: system-ui, sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-    h1 { text-align: center; color: #333; margin-bottom: 20px; }
-    div { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 400px; }
-    input, button { padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    div {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 400px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
     input { flex: 1 1 120px; }
-    button { background: #007bff; color: white; cursor: pointer; transition: 0.3s; }
+    button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
     button:hover { background: #0056b3; }
-    ul { list-style: none; padding: 0; margin-top: 20px; width: 100%; max-width: 400px; min-height: 50px; }
-    li { background: white; margin: 6px 0; padding: 10px; border-radius: 8px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    li span { flex: 1 1 auto; min-width: 50px; cursor: pointer; word-break: break-word; }
-    li button { background: crimson; border: none; color: white; padding: 6px 10px; border-radius: 6px; cursor: pointer; flex: 0 0 auto; }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 400px;
+      min-height: 100px; /* Гарантируем видимость на мобиле */
+    }
+    li {
+      background: white;
+      margin: 6px 0;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    li span {
+      flex: 1 1 auto;
+      min-width: 50px;
+      cursor: pointer;
+      word-break: break-word;
+    }
+    li button {
+      background: crimson;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
     li button:hover { background: darkred; }
-    #clearAll { margin-top: 15px; background: darkorange; width: 100%; max-width: 400px; }
+    #clearAll {
+      margin-top: 15px;
+      background: darkorange;
+      width: 100%;
+      max-width: 400px;
+    }
     #clearAll:hover { background: orangered; }
-    #toastContainer { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+    #toastContainer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
   </style>
 </head>
 <body>
@@ -74,10 +143,7 @@
       toast.style.transition = "opacity 0.5s";
       toastContainer.appendChild(toast);
       requestAnimationFrame(() => toast.style.opacity = "1");
-      setTimeout(() => {
-        toast.style.opacity = "0";
-        toast.addEventListener("transitionend", () => toast.remove());
-      }, 4000);
+      setTimeout(() => { toast.style.opacity = "0"; toast.addEventListener("transitionend", () => toast.remove()); }, 4000);
     }
 
     function addBirthday() {
@@ -101,6 +167,7 @@
 
     function renderList(snapshot) {
       list.innerHTML = "";
+      console.log("Данные:", snapshot.val());
       snapshot.forEach(child => {
         const key = child.key;
         const { name, date } = child.val();
@@ -154,7 +221,6 @@
     db.ref("birthdays").on("value", renderList);
     clearAllBtn.addEventListener("click", () => { if(confirm("Удалить весь список?")) db.ref("birthdays").remove(); });
 
-    // FCM token сохранение
     if("serviceWorker" in navigator) {
       navigator.serviceWorker.register("firebase-messaging-sw.js")
         .then(() => console.log("SW зарегистрирован"))
