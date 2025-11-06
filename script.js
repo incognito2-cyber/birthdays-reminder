@@ -17,7 +17,7 @@ function addBirthday() {
   dateInput.value = "";
 }
 
-// Добавить по кнопке и Enter
+// Кнопка "+" и Enter
 addBtn.addEventListener("click", addBirthday);
 [nameInput, dateInput].forEach(input => {
   input.addEventListener("keypress", e => {
@@ -50,6 +50,7 @@ db.ref("birthdays").on("value", snapshot => {
 
     span.textContent = text;
 
+    // Редактирование
     const editBtn = document.createElement("button");
     editBtn.textContent = "✎";
     editBtn.style.background = "orange";
@@ -61,6 +62,7 @@ db.ref("birthdays").on("value", snapshot => {
       }
     };
 
+    // Удаление
     const delBtn = document.createElement("button");
     delBtn.textContent = "✕";
     delBtn.onclick = () => {
@@ -78,4 +80,11 @@ db.ref("birthdays").on("value", snapshot => {
 // Удалить всё
 clearAllBtn.addEventListener("click", () => {
   if (confirm("Удалить весь список?")) db.ref("birthdays").remove();
+});
+
+// Уведомления
+Notification.requestPermission().then(permission => {
+  if (permission === "granted" && "serviceWorker" in navigator) {
+    navigator.serviceWorker.register("firebase-messaging-sw.js");
+  }
 });
